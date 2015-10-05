@@ -9,12 +9,9 @@ var $Promise = function(){
 	this.handlerGroups = [];
 }
 
-
-
 $Promise.prototype.then = function(successH, errorH){
 	var handler = {};
-	var x = 2;
-	console.log("two: " + x);
+	console.log("THEN called HERE");
 	console.log("successH: " + successH);
 
 	if (typeof successH === 'function'){
@@ -29,24 +26,32 @@ $Promise.prototype.then = function(successH, errorH){
 	}
 	// console.log('handler props', handler);
 	this.handlerGroups.push(handler);
-
-	console.log("hG in THEN: " + this.handlerGroups);
-	console.log("handler: " + handler);
+	this.callHandlers();
+	// console.log("hG in THEN: " + this.handlerGroups);
+	// console.log("handler: " + handler);
 }
 
 var Deferral = function(){
 	this.$promise = new $Promise();
 };
 
-$Promise.prototype.callHandlers = function(status){
-	console.log("hG:", this.handlerGroups)
+$Promise.prototype.callHandlers = function(){
+	console.log("hGroup in callH:", this.handlerGroups)
 	if (this.state === "pending"){
 		return
 	}
 	if (this.state === "resolved"){
-		handlerGroups.reduce(handler){
-// WE ARE HERE: write reduce to execute and empty each handler from the array.
+		var resolveValue = this.value;
+		console.log("thisVal:", resolveValue);
+		var current;
+		while(this.handlerGroups.length > 0){
+			current = this.handlerGroups.shift();
+			console.log("current:", current);
+			resolveValue = current.successCb(resolveValue);
+			console.log("resVal:", resolveValue);
 		}
+		// console.log(resolveValue);
+// WE ARE HERE: write reduce to execute and empty each handler from the array.
 	}
 }
 
@@ -55,7 +60,7 @@ Deferral.prototype.resolve = function(){
 	if (this.$promise.state === "pending"){
 		this.$promise.value = arguments[0];
 		this.$promise.state = "resolved";
-		// this.$promise.callHandlers("success")
+		this.$promise.callHandlers();
 	}
 }
 
@@ -100,4 +105,16 @@ var myPromise1 = myDeferral.$promise;
 
 
 
+/*
 
+		var reduced = this.handlerGroups.reduce(function(currentVal, item){
+			// current = handlerGroups.shift()
+			// return current.successH();
+			return item.successCb(currentVal)
+		}, resolveValue)
+
+		console.log("r'd", reduced);
+
+
+*/
+// 
